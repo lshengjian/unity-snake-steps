@@ -11,33 +11,57 @@ public class Snake : MonoBehaviour
     public int initialSize = 4;
     public bool moveThroughWalls = false;
 
-    private List<Transform> segments = new List<Transform>();
-    private Vector2Int input;
-    private float nextUpdate;
+    private List<Transform> m_segments = new List<Transform>();
+    private Vector2Int m_input;
+    private float m_nextUpdate;
+
+    private GameObject[] m_walls;
 
     private void Start()
     {
         ResetState();
+        m_walls = GameObject.FindGameObjectsWithTag("Wall");
+        SetWallColor();
     }
 
+    void SetWallColor()
+    {
+        foreach (GameObject wall in m_walls)
+        {
+            SpriteRenderer sp = wall.GetComponent<SpriteRenderer>();
+            sp.material.color = moveThroughWalls ? Color.green : Color.gray;
+        }
+
+    }
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Tab)){
+            moveThroughWalls = !moveThroughWalls;
+            SetWallColor();
+        }
+            
         // Only allow turning up or down while moving in the x-axis
         if (direction.x != 0f)
         {
-            if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) {
-                input = Vector2Int.up;
-            } else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)) {
-                input = Vector2Int.down;
+            if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
+            {
+                m_input = Vector2Int.up;
+            }
+            else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+            {
+                m_input = Vector2Int.down;
             }
         }
         // Only allow turning left or right while moving in the y-axis
         else if (direction.y != 0f)
         {
-            if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow)) {
-                input = Vector2Int.right;
-            } else if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)) {
-                input = Vector2Int.left;
+            if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
+            {
+                m_input = Vector2Int.right;
+            }
+            else if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
+            {
+                m_input = Vector2Int.left;
             }
         }
     }
@@ -45,20 +69,23 @@ public class Snake : MonoBehaviour
     private void FixedUpdate()
     {
         // Wait until the next update before proceeding
-        if (Time.time < nextUpdate) {
+        if (Time.time < m_nextUpdate)
+        {
             return;
         }
 
         // Set the new direction based on the input
-        if (input != Vector2Int.zero) {
-            direction = input;
+        if (m_input != Vector2Int.zero)
+        {
+            direction = m_input;
         }
 
         // Set each segment's position to be the same as the one it follows. We
         // must do this in reverse order so the position is set to the previous
         // position, otherwise they will all be stacked on top of each other.
-        for (int i = segments.Count - 1; i > 0; i--) {
-            segments[i].position = segments[i - 1].position;
+        for (int i = m_segments.Count - 1; i > 0; i--)
+        {
+            m_segments[i].position = m_segments[i - 1].position;
         }
 
         // Move the snake in the direction it is facing
@@ -68,14 +95,14 @@ public class Snake : MonoBehaviour
         transform.position = new Vector2(x, y);
 
         // Set the next update time based on the speed
-        nextUpdate = Time.time + (1f / (speed * speedMultiplier));
+        m_nextUpdate = Time.time + (1f / (speed * speedMultiplier));
     }
 
     public void Grow()
     {
         Transform segment = Instantiate(segmentPrefab);
-        segment.position = segments[segments.Count - 1].position;
-        segments.Add(segment);
+        segment.position = m_segments[m_segments.Count - 1].position;
+        m_segments.Add(segment);
     }
 
     public void ResetState()
@@ -84,26 +111,29 @@ public class Snake : MonoBehaviour
         transform.position = Vector3.zero;
 
         // Start at 1 to skip destroying the head
-        for (int i = 1; i < segments.Count; i++) {
-            Destroy(segments[i].gameObject);
+        for (int i = 1; i < m_segments.Count; i++)
+        {
+            Destroy(m_segments[i].gameObject);
         }
 
         // Clear the list but add back this as the head
-        segments.Clear();
-        segments.Add(transform);
+        m_segments.Clear();
+        m_segments.Add(transform);
 
         // -1 since the head is already in the list
-        for (int i = 0; i < initialSize - 1; i++) {
+        for (int i = 0; i < initialSize - 1; i++)
+        {
             Grow();
         }
     }
 
     public bool Occupies(int x, int y)
     {
-        foreach (Transform segment in segments)
+        foreach (Transform segment in m_segments)
         {
             if (Mathf.RoundToInt(segment.position.x) == x &&
-                Mathf.RoundToInt(segment.position.y) == y) {
+                Mathf.RoundToInt(segment.position.y) == y)
+            {
                 return true;
             }
         }
@@ -123,9 +153,12 @@ public class Snake : MonoBehaviour
         }
         else if (other.gameObject.CompareTag("Wall"))
         {
-            if (moveThroughWalls) {
+            if (moveThroughWalls)
+            {
                 Traverse(other.transform);
-            } else {
+            }
+            else
+            {
                 ResetState();
             }
         }
@@ -135,9 +168,12 @@ public class Snake : MonoBehaviour
     {
         Vector3 position = transform.position;
 
-        if (direction.x != 0f) {
+        if (direction.x != 0f)
+        {
             position.x = Mathf.RoundToInt(-wall.position.x + direction.x);
-        } else if (direction.y != 0f) {
+        }
+        else if (direction.y != 0f)
+        {
             position.y = Mathf.RoundToInt(-wall.position.y + direction.y);
         }
 

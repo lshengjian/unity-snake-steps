@@ -5,11 +5,11 @@ public class Food : MonoBehaviour
 {
     public Collider2D gridArea;
 
-    private Snake snake;
+    private Snake m_snake;
 
     private void Awake()
     {
-        snake = FindObjectOfType<Snake>();
+        m_snake = FindObjectOfType<Snake>();
     }
 
     private void Start()
@@ -27,7 +27,7 @@ public class Food : MonoBehaviour
         int y = Mathf.RoundToInt(Random.Range(bounds.min.y, bounds.max.y));
 
         // Prevent the food from spawning on the snake
-        while (snake.Occupies(x, y))
+        while (m_snake.Occupies(x, y))
         {
             x++;
 
