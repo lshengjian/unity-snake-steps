@@ -4,7 +4,7 @@ using UnityEngine;
 [RequireComponent(typeof(BoxCollider2D))]
 public class Snake : MonoBehaviour
 {
-    public Transform segmentPrefab;
+    public GameObject segmentPrefab;
     public Vector2Int direction = Vector2Int.right;
     public float speed = 20f;
     public float speedMultiplier = 1f;
@@ -17,9 +17,18 @@ public class Snake : MonoBehaviour
 
     private GameObject[] m_walls;
 
+    private ISnakeController m_controller;
+    private void Awake()
+    {
+        m_segments.Add(this.transform);
+        m_controller = new SnakeController(initialSize);
+        m_controller.OnSnakeChanged += DispalySnake;
+    }
+
     private void Start()
     {
-        ResetState();
+
+
         m_walls = GameObject.FindGameObjectsWithTag("Wall");
         SetWallColor();
     }
@@ -35,11 +44,12 @@ public class Snake : MonoBehaviour
     }
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Tab)){
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
             moveThroughWalls = !moveThroughWalls;
             SetWallColor();
         }
-            
+
         // Only allow turning up or down while moving in the x-axis
         if (direction.x != 0f)
         {
@@ -68,6 +78,7 @@ public class Snake : MonoBehaviour
 
     private void FixedUpdate()
     {
+
         // Wait until the next update before proceeding
         if (Time.time < m_nextUpdate)
         {
@@ -80,104 +91,78 @@ public class Snake : MonoBehaviour
             direction = m_input;
         }
 
-        // Set each segment's position to be the same as the one it follows. We
-        // must do this in reverse order so the position is set to the previous
-        // position, otherwise they will all be stacked on top of each other.
-        for (int i = m_segments.Count - 1; i > 0; i--)
-        {
-            m_segments[i].position = m_segments[i - 1].position;
-        }
-
-        // Move the snake in the direction it is facing
-        // Round the values to ensure it aligns to the grid
-        int x = Mathf.RoundToInt(transform.position.x) + direction.x;
-        int y = Mathf.RoundToInt(transform.position.y) + direction.y;
-        transform.position = new Vector2(x, y);
+        m_controller.Move(direction);
 
         // Set the next update time based on the speed
         m_nextUpdate = Time.time + (1f / (speed * speedMultiplier));
-    }
-
-    public void Grow()
-    {
-        Transform segment = Instantiate(segmentPrefab);
-        segment.position = m_segments[m_segments.Count - 1].position;
-        m_segments.Add(segment);
-    }
-
-    public void ResetState()
-    {
-        direction = Vector2Int.right;
-        transform.position = Vector3.zero;
-
-        // Start at 1 to skip destroying the head
-        for (int i = 1; i < m_segments.Count; i++)
+        if (m_controller.IsOver())
         {
-            Destroy(m_segments[i].gameObject);
-        }
+            m_controller.Reset();
 
-        // Clear the list but add back this as the head
-        m_segments.Clear();
-        m_segments.Add(transform);
-
-        // -1 since the head is already in the list
-        for (int i = 0; i < initialSize - 1; i++)
-        {
-            Grow();
         }
     }
 
-    public bool Occupies(int x, int y)
+
+    void DispalySnake(List<Vector2> segments)
     {
-        foreach (Transform segment in m_segments)
+        // Debug.Log(segments.Count + " " + m_segments.Count);
+        if (m_segments.Count > segments.Count)
         {
-            if (Mathf.RoundToInt(segment.position.x) == x &&
-                Mathf.RoundToInt(segment.position.y) == y)
+            foreach (var t in m_segments)
             {
-                return true;
+                if (t == transform)
+                    continue;
+                Destroy(t.gameObject);
             }
+            m_segments.Clear();
+            this.transform.localPosition = segments[0];
+            m_segments.Add(this.transform);
+
+        }
+        int cnt = segments.Count - m_segments.Count;
+
+        for (int i = 0; i < cnt; i++)
+        {
+            var obj = Instantiate(segmentPrefab);
+            m_segments.Add(obj.transform);
         }
 
-        return false;
+        for (int i = 0; i < segments.Count; i++)
+        {
+            m_segments[i].localPosition = segments[i];
+        }
     }
-
+   
+    public bool IsOccupies(int x, int y)
+    {
+        return m_controller.IsOccupies(x, y);
+    }
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.gameObject.CompareTag("Food"))
         {
-            Grow();
+            m_controller.Grow();
+            //Debug.Log("Food ");
         }
-        else if (other.gameObject.CompareTag("Obstacle"))
-        {
-            ResetState();
-        }
+        // else if (other.gameObject.CompareTag("Obstacle"))
+        // {
+        //      m_controller.Reset();
+        // }
         else if (other.gameObject.CompareTag("Wall"))
         {
             if (moveThroughWalls)
             {
-                Traverse(other.transform);
+                // Debug.Log("Traverse Wall ");
+                m_controller.Traverse(other.transform.localPosition, direction);
             }
             else
             {
-                ResetState();
+                m_controller.Reset();
+                Debug.Log("Reset ");
             }
         }
     }
 
-    private void Traverse(Transform wall)
-    {
-        Vector3 position = transform.position;
 
-        if (direction.x != 0f)
-        {
-            position.x = Mathf.RoundToInt(-wall.position.x + direction.x);
-        }
-        else if (direction.y != 0f)
-        {
-            position.y = Mathf.RoundToInt(-wall.position.y + direction.y);
-        }
-
-        transform.position = position;
-    }
 
 }

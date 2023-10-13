@@ -27,7 +27,7 @@ public class Food : MonoBehaviour
         int y = Mathf.RoundToInt(Random.Range(bounds.min.y, bounds.max.y));
 
         // Prevent the food from spawning on the snake
-        while (m_snake.Occupies(x, y))
+        while (m_snake.IsOccupies(x, y))
         {
             x++;
 
@@ -36,13 +36,16 @@ public class Food : MonoBehaviour
                 x = Mathf.RoundToInt(bounds.min.x);
                 y++;
 
-                if (y > bounds.max.y) {
+                if (y > bounds.max.y)
+                {
                     y = Mathf.RoundToInt(bounds.min.y);
                 }
             }
         }
 
-        transform.position = new Vector2(x, y);
+        var pos = new Vector2(x, y);
+        Debug.Log("Food:"+pos);
+        transform.position=pos;
     }
 
     private void OnTriggerEnter2D(Collider2D other)
