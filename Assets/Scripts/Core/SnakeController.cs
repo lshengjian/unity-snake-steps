@@ -15,6 +15,7 @@ public interface ISnakeController
     public void Traverse(Vector2 wall, Vector2 direction);
     public void Move(Vector2Int direction);
     public void Grow();
+    public void UnGrow();
     public bool IsOver();
 }
 
@@ -59,7 +60,7 @@ public class SnakeController : ISnakeController
     }
     public void Traverse(Vector2 wall, Vector2 direction)
     {
-        Debug.Log(wall);
+       // Debug.Log(wall);
         Vector3 position = m_segments[0];
 
         if (direction.x != 0f)
@@ -102,5 +103,13 @@ public class SnakeController : ISnakeController
     {
         Vector3 segment = m_segments[m_segments.Count - 1];//copy new data!
         m_segments.Add(segment);
+    }
+     public void UnGrow()
+    {
+        if (m_segments.Count>InitSegments){
+           // Vector3 segment = m_segments[m_segments.Count - 1];
+            m_segments.RemoveAt(m_segments.Count - 1);
+
+        }
     }
 }
