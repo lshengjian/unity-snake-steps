@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f925c48dfc4791648b78cb3051acd060, type: 3}
-  m_Name: Alex
+  m_Name: Player1
   m_EditorClassIdentifier: 
   Name: Alex
-  color: {r: 1, g: 1, b: 1, a: 1}
-  left: 276
-  right: 275
-  up: 273
-  down: 274
+  color: {r: 0.06741722, g: 0.705953, b: 0.9528302, a: 1}
+  left: 97
+  right: 100
+  up: 119
+  down: 115

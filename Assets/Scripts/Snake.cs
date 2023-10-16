@@ -5,92 +5,67 @@ using TMPro;
 public class Snake : MonoBehaviour
 {
     public GameObject segmentPrefab;
-    public TextMeshProUGUI score_text;
 
 
-    public RoleData config;
-    public Vector2Int direction = Vector2Int.right;
-    public float speed = 20f;
-    public float speedMultiplier = 1f;
     public int initialSize = 4;
 
 
     private List<Transform> m_segments = new List<Transform>();
-    private Vector2Int m_input;
-    private float m_nextUpdate;
 
-    private Game m_game;
     private int m_score = 0;
-
+    public int Score => m_score;
+    RoleData m_config;
+    public RoleData config => m_config;
     private ISnakeController m_controller;
+    public ISnakeController controller => m_controller;
+    private KeyInput m_keymgr;
     private void Awake()
     {
+         m_config = Resources.Load<RoleData>(this.name);
         m_segments.Add(this.transform);
-        m_controller = new SnakeController(initialSize);
+        m_controller = new SnakeController(initialSize, this.transform.localPosition);
         m_controller.OnSnakeChanged += DispalySnake;
+       
     }
     void Start()
     {
-        m_game = FindAnyObjectByType<Game>();
+        
+
         SpriteRenderer sr = GetComponent<SpriteRenderer>();
-        sr.color =  config.color;
-        score_text.color=config.color;
-       // print(Color.red);
+        sr.color = m_config.color;
+        m_keymgr = GetComponent<KeyInput>();
+        m_keymgr.OnOneStep += Move;
 
     }
 
-    private void Update()
+    void Move()
     {
+        m_controller.Move(m_keymgr.direction);
 
-
-        // Only allow turning up or down while moving in the x-axis
-        if (direction.x != 0f)
-        {
-            if (Input.GetKeyDown(config.up))
-            {
-                m_input = Vector2Int.up;
-            }
-            else if (Input.GetKeyDown(config.down))
-            {
-                m_input = Vector2Int.down;
-            }
-        }
-        // Only allow turning left or right while moving in the y-axis
-        else if (direction.y != 0f)
-        {
-            if (Input.GetKeyDown(config.right))
-            {
-                m_input = Vector2Int.right;
-            }
-            else if (Input.GetKeyDown(config.left))
-            {
-                m_input = Vector2Int.left;
-            }
-        }
     }
 
+    public void GetFood()
+    {
+        m_score += 10;
+        m_controller.Grow();
+
+    }
+
+
+    void Destroy()
+    {
+        m_keymgr.OnOneStep -= Move;
+
+    }
     private void FixedUpdate()
     {
 
-        // Wait until the next update before proceeding
-        if (Time.time < m_nextUpdate)
-        {
-            return;
-        }
 
-        // Set the new direction based on the input
-        if (m_input != Vector2Int.zero)
-        {
-            direction = m_input;
-        }
-
-        m_controller.Move(direction);
-
-        // Set the next update time based on the speed
-        m_nextUpdate = Time.time + (1f / (speed * speedMultiplier));
-        if (m_controller.IsOver())
+        if (m_controller.IsHitSelf())
         {
             m_controller.Reset();
+            m_score = 0;
+
 
         }
     }
@@ -119,7 +94,7 @@ public class Snake : MonoBehaviour
             var obj = Instantiate(segmentPrefab);
             m_segments.Add(obj.transform);
             SpriteRenderer sr = obj.GetComponent<SpriteRenderer>();
-            sr.color = config.color;
+            sr.color = m_config.color;
         }
 
         for (int i = 0; i < segments.Count; i++)
@@ -132,44 +107,5 @@ public class Snake : MonoBehaviour
     {
         return m_controller.IsOccupies(x, y);
     }
-    void UpdateScore(int new_score)
-    {
-        if (score_text == null)
-            return;
-        m_score = new_score;
-        score_text.text = m_score.ToString();
-    }
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.gameObject.CompareTag("Food"))
-        {
-            m_controller.Grow();
-            UpdateScore(m_score + 5);
-        }
-        else if (other.gameObject.CompareTag("Obstacle"))
-        {
-            // Debug.Log("hit Obstacle ");
-            int s = m_score - 10;
-            if (s < 0) s = 0;
-            UpdateScore(s);
-        }
-        else if (other.gameObject.CompareTag("Wall"))
-        {
-            if (m_game.moveThroughWalls)
-            {
-                
-                m_controller.Traverse(other.transform.localPosition, direction);
-            }
-            else
-            {
-                m_controller.Reset();
-
-                UpdateScore(0);
-                Debug.Log("Reset ");
-            }
-        }
-    }
-
-
 
 }

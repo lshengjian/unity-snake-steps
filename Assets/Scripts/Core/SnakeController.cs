@@ -16,7 +16,7 @@ public interface ISnakeController
     public void Move(Vector2Int direction);
     public void Grow();
     public void UnGrow();
-    public bool IsOver();
+    public bool IsHitSelf();
 }
 
 public class SnakeController : ISnakeController
@@ -26,20 +26,22 @@ public class SnakeController : ISnakeController
     public int InitSegments { get; private set; }
 
     private List<Vector2> m_segments = new List<Vector2>();
-    public SnakeController(int initialSize = 4)
+    Vector2 m_headPos;
+    public SnakeController(int initialSize , Vector2 pos)
     {
         InitSegments = initialSize >= 2 ? initialSize : 2;
+        m_headPos=pos;
         Reset();
     }
     public void Reset()
     {
         m_segments.Clear();
-        m_segments.Add(Vector2.zero);
+        m_segments.Add(new Vector2(m_headPos.x,m_headPos.y));
         for (int i = 0; i < InitSegments - 1; i++)
             Grow();
         OnSnakeChanged.Invoke(m_segments);
     }
-    public bool IsOver()
+    public bool IsHitSelf()
     {
         bool rt = false;
         var head = m_segments[0];

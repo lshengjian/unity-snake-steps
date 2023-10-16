@@ -10,7 +10,7 @@ public class LogicTest
     [Test]
     public void Test01_Move()
     {
-        ISnakeController logic=new SnakeController(2);
+        ISnakeController logic=new SnakeController(2,Vector2.zero);
         Assert.AreEqual(Vector2.zero,logic.GetPosition(0));
         Assert.AreEqual(Vector2.zero,logic.GetPosition(1));
 
@@ -23,7 +23,7 @@ public class LogicTest
     [Test]
     public void Test02_Over()
     {
-        ISnakeController logic=new SnakeController(8);
+        ISnakeController logic=new SnakeController(8,Vector2.zero);
         logic.Move(Vector2Int.right);
         Assert.AreEqual(Vector2.right,logic.GetPosition(0));
         Assert.AreEqual(Vector2.zero,logic.GetPosition(1));
@@ -37,7 +37,7 @@ public class LogicTest
         Assert.AreEqual(Vector2.zero,logic.GetPosition(0));
         Assert.AreEqual(Vector2.up,logic.GetPosition(1));
 
-        Assert.IsTrue(logic.IsOver());
+        Assert.IsTrue(logic.IsHitSelf());
         
 
     }
