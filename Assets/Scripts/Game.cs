@@ -6,9 +6,8 @@ using UnityEngine;
 public class Game : MonoBehaviour
 {
     public Collider2D gridArea;
-
-    
-
+    public Detector foodDetector;
+   
     public bool moveThroughWalls = false;
     private GameObject[] m_walls;
     private Snake[] m_snakes;
@@ -18,22 +17,20 @@ public class Game : MonoBehaviour
     {
 
         m_limit = gridArea.GetComponent<BoundLimit>();
-        m_limit.OnOutBound.AddListener(OnTouchWall);
+        m_limit.OnOutBound+=OnTouchWall;
     }
     void Destroy()
     {
-        m_limit.OnOutBound.RemoveAllListeners();
+        m_limit.OnOutBound-=OnTouchWall;
+        foodDetector.OnTouched+=OnTouchFood;
 
     }
     private void Start()
     {
-
-
         m_walls = GameObject.FindGameObjectsWithTag("Wall");
         SetWallColor();
         m_snakes = FindObjectsOfType<Snake>();
-
-
+        foodDetector.OnTouched+=OnTouchFood;
     }
     public Vector2 GetFreePosition()
     {
@@ -66,7 +63,7 @@ public class Game : MonoBehaviour
 
     public void OnTouchWall(Transform snake)
     {
-        Debug.Log(snake.name + " hit wall");
+       // Debug.Log(snake.name + " hit wall");
         Snake s = snake.GetComponent<Snake>();
         KeyInput km = snake.GetComponent<KeyInput>();
         if (moveThroughWalls)
@@ -80,7 +77,7 @@ public class Game : MonoBehaviour
     }
     public void OnTouchFood(Transform food, Transform snake)
     {
-        Debug.Log(snake.name + " get food");
+       // Debug.Log(snake.name + " get food");
         food.localPosition = GetFreePosition();
         Snake s = snake.GetComponent<Snake>();
         s.GetFood();
@@ -100,7 +97,7 @@ public class Game : MonoBehaviour
         foreach (GameObject wall in m_walls)
         {
             SpriteRenderer sp = wall.GetComponent<SpriteRenderer>();
-            sp.material.color = moveThroughWalls ? Color.green : Color.gray;
+            sp.color = moveThroughWalls ? Color.green : Color.gray;
         }
 
     }

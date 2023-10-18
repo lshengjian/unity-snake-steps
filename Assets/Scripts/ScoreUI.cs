@@ -10,15 +10,16 @@ public class ScoreUI : MonoBehaviour
     {
         score_text = GetComponent<TextMeshProUGUI>();
         score_text.color = player.config.color;
+        player.score.OnValueChanged+=UpdateText;
 
     }
 
-    private void Update()
+    private void UpdateText(int s)
     {
 
 
         if (score_text == null)
             return;
-        score_text.text = player.Score.ToString();
+        score_text.text = s.ToString();
     }
 }

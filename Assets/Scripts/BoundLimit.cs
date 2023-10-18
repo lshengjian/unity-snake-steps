@@ -1,12 +1,13 @@
+
 using UnityEngine;
-using UnityEngine.Events;
+using System;
 public class BoundLimit : MonoBehaviour
 {
-      public  UnityEvent<Transform> OnOutBound;
+      public event Action<Transform> OnOutBound=_=>{};
       private void OnTriggerExit2D(Collider2D other)
     {
 
-        OnOutBound?.Invoke(other.transform);
+        OnOutBound.Invoke(other.transform);
 
     }
 }

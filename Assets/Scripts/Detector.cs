@@ -1,9 +1,10 @@
 using UnityEngine;
-using UnityEngine.Events;
+using System;
+using TMPro;
 
 public class Detector : MonoBehaviour
 {
-    public  UnityEvent<Transform,Transform> OnTouched;
+    public event Action<Transform,Transform> OnTouched= (_,_) => {};
     
     public string oppositeTag="";
     // Start is called before the first frame update
@@ -11,7 +12,7 @@ public class Detector : MonoBehaviour
     {
         if (other.gameObject.CompareTag(oppositeTag))
         {
-            OnTouched?.Invoke(this.transform,other.transform);
+            OnTouched.Invoke(this.transform,other.transform);
         } 
     }
 }

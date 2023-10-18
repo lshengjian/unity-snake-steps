@@ -67,6 +67,7 @@ public class KeyInput : MonoBehaviour
         {
             direction = m_input;
             OnOneStep.Invoke();
+            //Debug.Log(name+" Input");
         }
 
         m_nextUpdate = Time.time + cooldown;
