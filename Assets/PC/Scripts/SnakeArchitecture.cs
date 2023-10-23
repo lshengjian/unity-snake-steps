@@ -10,8 +10,11 @@
 
             RegisterSystem<ISysMove>(new SysMove());
             RegisterSystem<ISysSpawn>(new SysSpawn());
+            RegisterSystem<ISysAchievement>(new SysAchievement());
 
             RegisterUtility<IStorage>(new PlayerPrefsStorage());
+         
+;
         }
     }
 }

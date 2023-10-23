@@ -9,13 +9,13 @@ namespace QFramework.MyGame
 
     }
 
-     public struct EventFoodSpawned 
+
+
+    public struct EventGamePassed 
     {
-     
-        public List<BindableProperty<Vector2>> data;
 
     }
-    public struct EventGamePassed 
+    public struct EventGameOver 
     {
 
     }

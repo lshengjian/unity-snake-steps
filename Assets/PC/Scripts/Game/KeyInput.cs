@@ -5,13 +5,10 @@ namespace QFramework.MyGame
 {
     public class KeyInput : MonoBehaviour, IController
     {
-
-        public event Action OnOneStep = () => { };
         public Vector2Int direction = Vector2Int.right;
-        public float cooldown = 0.2f;
+        public float cooldown = 0.5f;
 
-        private Vector2Int m_input;
-
+        private Vector2Int m_input = Vector2Int.right;
 
         private float m_nextUpdate = 0f;
 
@@ -23,18 +20,24 @@ namespace QFramework.MyGame
 
         void Start()
         {
+            var gameModel = this.GetModel<GameModel>();
+            var pd = gameModel.GetPlayerData(this.name);
 
-            m_config = Resources.Load<RoleData>(this.name);
-        //     mSysMove = this.GetSystem<ISysMove>();
-       
-
+            m_config = pd.config;
+            pd.Score.Register(v =>
+            {
+                if (v < 100)
+                    return;
+                cooldown -= 0.0002f;
+                if (cooldown < 0.01f)
+                    cooldown = 0.01f;
+            });
 
         }
-      
+
 
         private void Update()
         {
-
 
             // Only allow turning up or down while moving in the x-axis
             if (direction.x != 0f)
@@ -67,24 +70,11 @@ namespace QFramework.MyGame
 
             // Wait until the next update before proceeding
             if (Time.time < m_nextUpdate)
-            {
                 return;
-            }
-
-            // Set the new direction based on the input
-            if (m_input != Vector2Int.zero)
-            {
-                direction = m_input;
-                CmdMove cmd=new CmdMove(this.name,direction);
-                this.SendCommand(cmd);
-                //OnOneStep.Invoke();
-                //Debug.Log(name+" Input");
-            }
-
+            direction = m_input;
+            CmdMove cmd = new CmdMove(this.name, direction);
+            this.SendCommand(cmd);
             m_nextUpdate = Time.time + cooldown;
-
-
-
         }
 
 

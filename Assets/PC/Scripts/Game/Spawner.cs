@@ -43,6 +43,7 @@ namespace QFramework.MyGame
             {
                 GameObject food = Instantiate(foodPrefab, this.transform);
                 food.name = "Food_" + i.ToString();
+             //   Debug.Log(food.name);
                 bp.RegisterWithInitValue((pos) =>
                 {
                     food.transform.localPosition = pos;

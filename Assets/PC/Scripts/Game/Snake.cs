@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+
 namespace QFramework.MyGame
 {
     // [RequireComponent(typeof(BoxCollider2D))]
@@ -28,8 +28,9 @@ namespace QFramework.MyGame
         }
         void Start()
         {
-
-            m_config = Resources.Load<RoleData>(this.name);
+            var pd = this.GetModel<GameModel>().GetPlayerData(this.name);
+            m_config = pd.config;
+            //m_config = Resources.Load<RoleData>(this.name);
             this.RegisterEvent<EventSnakeMoved>(MoveSnake)
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
         }
@@ -45,6 +46,7 @@ namespace QFramework.MyGame
                 for (int i = 0; i < segments.Count; i++)
                 {
                     var obj = Instantiate(segmentPrefab, this.transform);
+                    obj.name=this.name;
                     SpriteRenderer sr = obj.GetComponent<SpriteRenderer>();
                     sr.color = m_config.color;
                     m_segments.Add(obj.transform);

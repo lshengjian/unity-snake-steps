@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Unity.Collections.LowLevel.Unsafe;
+
 using UnityEngine;
 namespace QFramework.MyGame
 {
@@ -73,12 +73,20 @@ namespace QFramework.MyGame
             }
             mSnakePositions[cmd.name].Clear();
             mSnakePositions[cmd.name].AddRange(data);
-            EventSnakeMoved e = new EventSnakeMoved() { name = cmd.name, data = data };
-            CheckHitFood(cmd.name, data);
-            this.SendEvent(e);
 
+
+            if (snake.IsHitSelf())
+
+                this.SendEvent<EventGameOver>();
+            else
+            {
+                EventSnakeMoved e = new EventSnakeMoved() { name = cmd.name, data = data };
+                CheckHitFood(cmd.name, data);
+                this.SendEvent(e);
+            }
 
         }
+
         void CheckHitFood(string name, List<Vector2> data)
         {
             var foodModel = this.GetModel<FoodModel>();
@@ -94,7 +102,7 @@ namespace QFramework.MyGame
                         ISnakeMgr snake = mSysSpawn.GetSnakeMgr(name);
                         snake.Grow();
                         var pd = mGameModel.GetPlayerData(name);
-                        pd.Score.Value+=10;
+                        pd.Score.Value += 10;
                         break;
                     }
                 }
@@ -118,4 +126,30 @@ namespace QFramework.MyGame
         }
 
     }
+    // bool CheckHitBody(string name, List<Vector2> data) //后端检擦效率太低，并且没有考虑CoolDown机制
+    // {
+    //     ISnakeMgr snake = mSysSpawn.GetSnakeMgr(name);
+    //     if (snake.IsHitSelf())
+    //     {
+    //         this.SendEvent<EventGameOver>();
+    //         return true;
+    //     }
+    //     else
+    //     {
+    //         foreach (var pos in data)
+    //         {
+    //             foreach (var other in mGameModel.PlayerNames)
+    //             {
+    //                 if (name == other) continue;
+    //                 ISnakeMgr snake2 = mSysSpawn.GetSnakeMgr(other);
+    //                 if (snake2.IsOccupies(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.y)))
+    //                 {
+    //                     mGameModel.Score.Value -= 5;
+    //                     return true;
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     return false;
+    // }
 }

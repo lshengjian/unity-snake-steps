@@ -5,13 +5,11 @@ namespace QFramework.MyGame
 {
     public interface ISysSpawn : ISystem
     {
-      public  List<BindableProperty<Vector2>> FoodBindPositions{get;}
-         public Vector2 GetFreePosition();
-          public ISnakeMgr GetSnakeMgr(string name);
-            public void ResetSnakes(bool gotoZero);//just for test
-           
-        //   void MakeFoods(CmdMakeFoods cmd);
-        //  void MakeSnakes(CmdMakeSnakes cmd);
+        public List<BindableProperty<Vector2>> FoodBindPositions { get; }
+        public Vector2 GetFreePosition();
+        public ISnakeMgr GetSnakeMgr(string name);
+        public void ResetSnakes(bool gotoZero);//just for test
+
     }
     public class CmdSwitchThroughWalls : AbstractCommand
     {
@@ -23,32 +21,24 @@ namespace QFramework.MyGame
 
     }
 
-    //  public class CmdMakeFoods : AbstractCommand
-    // {
-    //     protected override void OnExecute()
-    //     {
-    //         this.GetSystem<ISysSpawn>().MakeFoods(this);
-    //     }
-
-    // }
 
 
     public class SysSpawn : AbstractSystem, ISysSpawn
     {
-        FoodModel foodModel;
+        FoodModel mFoodModel;
         GameModel mGameModel;
 
-        List<BindableProperty<Vector2>> mFoodBindPositions=new List<BindableProperty<Vector2>>();
+        List<BindableProperty<Vector2>> mFoodBindPositions = new List<BindableProperty<Vector2>>();
         Dictionary<string, ISnakeMgr> mSnakes = new Dictionary<string, ISnakeMgr>();
-         public  List<BindableProperty<Vector2>> FoodBindPositions=>mFoodBindPositions;
-        public ISnakeMgr GetSnakeMgr(string name){
+        public List<BindableProperty<Vector2>> FoodBindPositions => mFoodBindPositions;
+        public ISnakeMgr GetSnakeMgr(string name)
+        {
             return mSnakes[name];
         }
         protected override void OnInit()
         {
 
-            foodModel = this.GetModel<FoodModel>();
-            // sysMove = this.GetSystem<ISysMove>();
+            mFoodModel = this.GetModel<FoodModel>();
             mGameModel = this.GetModel<GameModel>();
             MakeFoods();
             foreach (var name in mGameModel.PlayerNames)
@@ -57,15 +47,17 @@ namespace QFramework.MyGame
                 var pos = GetFreePosition();
                 pd.InitPosition = pos;
                 mSnakes[name] = new SnakeMgr(mGameModel.NumInitSnakeSegments, pos);
-               
+
             }
         }
-               public void ResetSnakes(bool gotoZero)
+        public void ResetSnakes(bool gotoZero)
         {
+            mGameModel.Score.Value = 0;
             foreach (var name in mGameModel.PlayerNames)
             {
                 var pd = mGameModel.GetPlayerData(name);
                 pd.Life.Value = 3;
+                pd.Score.Value = 0;
                 if (gotoZero) pd.InitPosition = Vector2.zero;
                 mSnakes[name].Reset(pd.InitPosition);
             }
@@ -112,11 +104,11 @@ namespace QFramework.MyGame
         public void MakeFoods()
         {
             mFoodBindPositions = new List<BindableProperty<Vector2>>();
-            for (int i = 0; i < foodModel.NumFood; i++)
+            for (int i = 0; i < mFoodModel.NumFood; i++)
             {
                 Vector2 pos = GetFreePosition();
-                foodModel.SetPositionAt(i, pos);
-                mFoodBindPositions.Add(foodModel.GetBindPropAt(i));
+                mFoodModel.SetPositionAt(i, pos);
+                mFoodBindPositions.Add(mFoodModel.GetBindPropAt(i));
             }
             // EventFoodSpawned e=new EventFoodSpawned(){data=data};
             // this.SendEvent(e);

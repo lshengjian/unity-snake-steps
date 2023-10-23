@@ -12,7 +12,7 @@ public class Detector : MonoBehaviour
     {
         if (other.gameObject.CompareTag(oppositeTag))
         {
-            Debug.Log(this.name+"-->"+other.name);
+            //Debug.Log(this.name+"-->"+other.name);
             OnTouched.Invoke(this.transform,other.transform);
         } 
     }

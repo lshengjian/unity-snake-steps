@@ -8,6 +8,7 @@ namespace QFramework.MyGame
      //   public Collider2D gridArea;
        
         public GameObject PassUI;
+         public GameObject OverUI;
         private GameObject[] m_walls;
         GameModel mGameModel;
    
@@ -18,9 +19,17 @@ namespace QFramework.MyGame
             mGameModel=this.GetModel<GameModel>();
             this.RegisterEvent<EventGamePassed>(e =>
             {
-                Debug.Log("Game Pass! ");
+              //  Debug.Log("Game Pass! ");
                 PassUI.SetActive(true);
-                //PlayUI.SetActive(false);
+                OverUI.SetActive(false);
+                Time.timeScale=0;
+            }).UnRegisterWhenGameObjectDestroyed(gameObject);
+            this.RegisterEvent<EventGameOver>(e =>
+            {
+              //  Debug.Log("Game Pass! ");
+                OverUI.SetActive(true);
+                PassUI.SetActive(false);
+                Time.timeScale=0;
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
            
              
@@ -28,12 +37,11 @@ namespace QFramework.MyGame
        
         public void Replay()
         {
+            Time.timeScale=1;
+            this.GetSystem<ISysSpawn>().ResetSnakes(false);
             SceneManager.LoadScene("PlayLocal");
         }
-        void OnDestroy()
-        {
-          Debug.Log("Game OnDestroy! ");
-        }
+       
         private void Start()
         {
             m_walls = GameObject.FindGameObjectsWithTag("Wall");
