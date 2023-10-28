@@ -13,7 +13,7 @@ namespace QFramework.MyGame
         public Vector2 HeadPosition { get; set; }
         public int NumSegments { get; }
         public Vector2 GetPosition(int index);//just for test
-        //public void Move(Vector2 direction);//just for test
+      //  public void Move(Vector2 direction);//just for test
         public bool IsOccupies(int x, int y);
 
 
@@ -98,6 +98,14 @@ namespace QFramework.MyGame
             }
 
             return false;
+        }
+        public void Move(Vector2 direction){
+            var head = m_segments[0];
+            for (int i = m_segments.Count-1; i>0; i--)
+                      m_segments[i]=m_segments[i-1];
+             m_segments[0]=head+direction;
+              OnSnakeChanged.Invoke(m_segments);
+         
         }
 
         public void Grow()

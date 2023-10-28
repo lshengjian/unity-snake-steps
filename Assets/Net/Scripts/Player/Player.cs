@@ -1,17 +1,25 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using QFramework.MyGame;
 namespace Mirror.MyGame
 {
+    //https://blog.csdn.net/Cake_C/article/details/123285031
     public class Player : NetworkBehaviour
     {
-        SpriteRenderer mRenderer;
+
+        public Sprite sprite;
+        public GameObject segmentPrefab;
+
+        // public readonly SyncList<Vector2> m_segments = new SyncList<Vector2>();
+        // List<GameObject> m_bodies = new List<GameObject>();
+
         public event System.Action<byte> OnPlayerIndexChanged;
         public event System.Action<Color32> OnPlayerColorChanged;
         public event System.Action<ushort> OnPlayerScoreChanged;
 
         // Players List to manage playerNumber
         static readonly List<Player> playersList = new List<Player>();
+
 
         [Header("Player UI")]
         public GameObject playerUIPrefab;
@@ -81,19 +89,24 @@ namespace Mirror.MyGame
             // set the initial player data
             score = 0;//(ushort)Random.Range(100, 1000);
 
-            transform.localPosition = new Vector3(Random.Range(-1, 1), Random.Range(-1, 1), 0);
-            Food.ServerOnFoodEaten += (obj =>
-            {
-                if (obj != this.gameObject)
-                    return;
-                score += 10;
-
-            });//todo
+            transform.position = new Vector3(Random.Range(-4, 5), Random.Range(-4, 5), 0);
 
 
-            // Start generating updates
-            //  InvokeRepeating(nameof(UpdateData), 1, 1);
-            // NetworkServer.Spawn(gameObject);
+            Food.ServerOnFoodEaten += AddScore;
+           // var pos = transform.localPosition;
+
+           
+
+        
+          //  InvokeRepeating("RepeatMethod", 3f, 1f);
+
+        }
+
+        void AddScore(GameObject playerWhoAte)
+        {
+            if (playerWhoAte != gameObject) return;
+            score += 10;
+  
         }
 
         // This is called from BasicNetManager OnServerAddPlayer and OnServerDisconnect
@@ -106,12 +119,7 @@ namespace Mirror.MyGame
                 player.index = playerNumber++;
         }
 
-        // This only runs on the server, called from OnStartServer via InvokeRepeating
-        // [ServerCallback]
-        // void UpdateData()
-        // {
-        //     score = (ushort)Random.Range(0, 1000);
-        // }
+
 
         /// <summary>
         /// Invoked on the server when the object is unspawned
@@ -121,11 +129,15 @@ namespace Mirror.MyGame
         {
             CancelInvoke();
             playersList.Remove(this);
+            Food.ServerOnFoodEaten -= AddScore;
+            //mgr.OnSnakeChanged -= DispalySnake;
+            // mgr.Reset(transform.position);
         }
 
         #endregion
 
         #region Client
+    
 
         /// <summary>
         /// Called on every NetworkBehaviour when it is activated on a client.
@@ -133,8 +145,8 @@ namespace Mirror.MyGame
         /// </summary>
         public override void OnStartClient()
         {
-            mRenderer = GetComponent<SpriteRenderer>();
-            mRenderer.color = color;
+            GetComponent<SpriteRenderer>().color=color;
+            name=$"Player{index+1}";
             // Instantiate the player UI as child of the Players Panel
             playerUIObject = Instantiate(playerUIPrefab, CanvasUI.GetPlayersPanel());
             playerUI = playerUIObject.GetComponent<PlayerUI>();
@@ -150,24 +162,41 @@ namespace Mirror.MyGame
             OnPlayerScoreChanged.Invoke(score);
 
         }
+        // void SegmentsChanges(SyncList<Vector2>.Operation op, int itemIndex, Vector2 oldItem, Vector2 newItem)
+        // {
+        //     Debug.Log(op);
+        //     Debug.Log(itemIndex + " " + newItem);
+        //     switch (op)
+        //     {
+        //         case SyncList<Vector2>.Operation.OP_ADD:
+        //             {
+        //                 //在SyncList里添加一个新对象，itemIndex是这个新对象的下标，newItem就是这个新对象的引用
+        //                 var obj = Instantiate(segmentPrefab, this.transform);
+        //                 obj.transform.localPosition = newItem;
+        //                 obj.name = this.name;
+        //                 SpriteRenderer sr = obj.GetComponent<SpriteRenderer>();
+        //                 sr.color = color;
+        //                 m_bodies.Add(obj);
+        //                 if (itemIndex == 0)
+        //                 {
+        //                     obj.transform.localScale = Vector3.one * 1.2f;
+        //                     obj.tag = "Player";
+
+        //                 }
+        //                 else
+        //                 {
+        //                     obj.tag = "Obstacle";
+        //                 }
+        //                 var renderer = obj.GetComponent<SpriteRenderer>();
+        //                 renderer.color = color;
+        //                 break;
+        //             }
+        //     }
+
+        // }
 
 
-        void Update()
-        {
-            if (!Application.isFocused) return;
 
-            // movement for local player
-            if (isLocalPlayer)
-            {
-
-                float dx = Input.GetAxis("Horizontal");
-                float dy = Input.GetAxis("Vertical");
-                Vector3 dv = Vector3.right * dx + Vector3.up * dy;
-
-                transform.Translate(dv * 5f * Time.deltaTime);
-            }
-
-        }
 
         /// <summary>
         /// Called when the local player object has been set up.

@@ -8,7 +8,7 @@ namespace Mirror.MyGame
     public class SnakeNetworkManager : NetworkManager
     {
         [SerializeField] GameObject foodSpawnerPrefab, gameOverHandlerPrefab;
-        List<PlayerName> players = new List<PlayerName>();
+       // List<PlayerName> players = new List<PlayerName>();
         [SerializeField] private TMP_Text countdownText;
 
         public float timeLeft = 90f;

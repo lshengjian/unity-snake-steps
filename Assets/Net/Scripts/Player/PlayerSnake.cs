@@ -10,9 +10,9 @@ namespace Mirror.MyGame
 public class PlayerSnake : NetworkBehaviour
 {
     [SerializeField] TailSpawner tailSpawner;
-    [SerializeField] PlayerName playerName;
-    public static event Action<PlayerName> ServerOnPlayerSpawned;
-    public static event Action<PlayerName> ServerOnPlayerDespawned;
+    // [SerializeField] PlayerName playerName;
+    // public static event Action<PlayerName> ServerOnPlayerSpawned;
+    // public static event Action<PlayerName> ServerOnPlayerDespawned;
     
     public int points = 10;
     private int score = 0;
@@ -21,7 +21,7 @@ public class PlayerSnake : NetworkBehaviour
 
     public override void OnStartServer()
     {
-        ServerOnPlayerSpawned?.Invoke(playerName);
+     //   ServerOnPlayerSpawned?.Invoke(playerName);
         hasCollided = false;
     }
 
@@ -55,7 +55,7 @@ public class PlayerSnake : NetworkBehaviour
 
     void DestroySelf()
     {
-        ServerOnPlayerDespawned?.Invoke(playerName);
+      //  ServerOnPlayerDespawned?.Invoke(playerName);
         foreach (var tail in tailSpawner.Tails)
             NetworkServer.Destroy(tail);
         NetworkServer.Destroy(gameObject);
