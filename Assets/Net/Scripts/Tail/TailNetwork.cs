@@ -46,8 +46,9 @@ namespace Mirror.MyGame
             var tails = Owner.GetComponent<TailSpawner>().Tails;
             this.name = $"Player{idx}-{tails.Count}";
             r.color = player.color;
+            var dir=Owner.GetComponent<SnakeMovement>().direction;
 
-            this.transform.position = Target.transform.position-Vector3.right;
+            this.transform.position = Target.transform.position-new Vector3(dir.x,dir.y,0f);
 
 
         }

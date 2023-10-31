@@ -3,13 +3,13 @@ using UnityEngine.SceneManagement;
 
 public class MenuMgr : MonoBehaviour
 {
-    public void SinglePlayer()
+    public void PlayOnPC()
     {
         SceneManager.LoadScene("PlayLocal");
     }
 
-    public void MultiPlayer()
+    public void PlayOnNet()
     {
-       // SceneManager.LoadScene("MultiPlayer");
+        SceneManager.LoadScene("BasicNetDemo");
     }
 }

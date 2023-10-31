@@ -11,8 +11,11 @@ namespace Mirror.MyGame
         public List<GameObject> Tails { get; } = new List<GameObject>();
         //  [SyncVar] 
         float timer = 0;
+         public  static bool isOver{get;set;}=false;
 
-
+void Start(){
+     TailSpawner.isOver=false;
+}
         public override void OnStartServer()
         {
             Food.ServerOnFoodEaten += AddTail;
@@ -34,7 +37,7 @@ namespace Mirror.MyGame
         }
         void Update()
         {
-            if (isServer)
+            if (isServer&&!isOver)
             {
                 timer += Time.deltaTime;
                 if (timer >= delay)

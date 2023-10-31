@@ -145,6 +145,7 @@ namespace Mirror.MyGame
         /// </summary>
         public override void OnStartClient()
         {
+            base.OnStartClient();
             GetComponent<SpriteRenderer>().color=color;
             name=$"Player{index+1}";
             // Instantiate the player UI as child of the Players Panel
